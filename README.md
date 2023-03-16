@@ -1,4 +1,7 @@
 # 🌎 Planning Goals for Exploration
+ICLR 2023 (Spotlight)\
+[Edward S. Hu](https://edwardshu.com/), Richard Chang, [Oleh Rybkin](https://www.seas.upenn.edu/~oleh/), [Dinesh Jayaraman](https://www.seas.upenn.edu/~dineshj/)
+
 The official implementation of the Planning Exploratory Goals (PEG) agent, an unsupervised RL agent for hard exploration tasks.
 
 ![PEG Teaser](docs/peg_teaser.gif)
