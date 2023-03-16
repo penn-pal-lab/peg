@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info
+dist
+MUJOCO_LOG.TXT
+*gifs
+stack_videos
+gifs/
+*.out
+examples/.ipynb_checkpoints/PlannerVisualizer-checkpoint.ipynb
+visualize_planner_cache.pkl
+logs/
+pegs2_data
+3stack_states_images
+imgs

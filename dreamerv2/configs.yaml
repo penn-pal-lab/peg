@@ -1,0 +1,409 @@
+defaults:
+
+  # Train Script
+  logdir: /dev/null
+  seed: 0
+  task: dmc_walker_walk
+  envs: 1
+  envs_parallel: none
+  render_size: [64, 64]
+  dmc_camera: -1
+  atari_grayscale: True
+  time_limit: 0
+  action_repeat: 1
+  steps: 1e8
+  log_every: 1e4
+  ckpt_every: 0
+  eval_every: 1e5
+  eval_eps: 1
+  prefill: 10000
+  pretrain: 1
+  train_every: 5
+  train_steps: 1
+  expl_until: 0
+  replay: {capacity: 2e6, ongoing: False, minlen: 50, maxlen: 50, prioritize_ends: True, sample_recent: False, recent_episode_threshold: 0, initial_buffer_path: '', initial_buffer_capacity: 1e6, shuffle_blocks: False}
+  dataset: {batch: 16, length: 50}
+  goal_dataset: {batch: 150, length: 50}
+  log_keys_video: ['image']
+  log_keys_sum: '^$'
+  log_keys_mean: '^$'
+  log_keys_max: '^$'
+  precision: 16
+  jit: True
+  state_key: none
+  goal_key: none
+  image_input: True
+  no_render: False
+  slurm_preempt: False
+  gcp_train_factor: 1
+
+  # Agent
+  clip_rewards: tanh
+  expl_behavior: greedy
+  expl_noise: 0.0
+  epsilon_expl_noise: 0.0
+  eval_noise: 0.0
+  eval_state_mean: False
+
+  # World Model
+  grad_heads: [decoder, reward, discount]
+  pred_discount: True
+  pred_reward: True
+  rssm: {ensemble: 1, hidden: 1024, deter: 1024, stoch: 32, discrete: 32, act: elu, norm: none, std_act: sigmoid2, min_std: 0.1}
+  encoder: {mlp_keys: '.*', cnn_keys: '.*', act: elu, norm: none, cnn_depth: 48, cnn_kernels: [4, 4, 4, 4], mlp_layers: [400, 400, 400, 400]}
+  decoder: {mlp_keys: '.*', cnn_keys: '.*', act: elu, norm: none, cnn_depth: 48, cnn_kernels: [5, 5, 6, 6], mlp_layers: [400, 400, 400, 400]}
+  reward_head: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  discount_head: {layers: 4, units: 400, act: elu, norm: none, dist: binary}
+  loss_scales: {kl: 1.0, reward: 1.0, discount: 1.0, proprio: 1.0}
+  kl: {free: 0.0, forward: False, balance: 0.8, free_avg: True}
+  model_opt: {opt: adam, lr: 1e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+
+  # Actor Critic
+  actor: {layers: 4, units: 400, act: elu, norm: none, dist: auto, min_std: 0.1}
+  critic: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  actor_opt: {opt: adam, lr: 8e-5, eps: 1e-5, clip: 100, wd: 1e-6}
+  critic_opt: {opt: adam, lr: 2e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+  discount: 0.99
+  p2e_discount: 0.99
+  discount_lambda: 0.95
+  imag_horizon: 15
+  actor_grad: auto
+  actor_grad_mix: 0.1
+  actor_ent: 2e-3
+  slow_target: True
+  slow_target_update: 100
+  slow_target_fraction: 1
+  slow_baseline: True
+  reward_norm: {momentum: 1.0, scale: 1.0, eps: 1e-8}
+
+  # Goal Conditioning Stuff
+  gc_input: 'embed'
+  gc_reward: 'dynamical_distance'
+  gc_reward_shape: 'sum' # sum_diff
+  pred_embed: True
+  embed_head: {layers: 3, units: 400, act: elu, norm: none, dist: mse}
+  training_goals: 'batch'
+  train_env_goal_percent: 0.0
+  labelled_env_multiplexing: False
+  subgoal_threshold: 5.0
+  goal_policy_rollout_percentage: 0.3
+  goal_strategy: 'SampleReplay'
+  gcp_rollout_every: 1 # run gcp rollout every X algo update.
+  exp_rollout_every: 1 # run exp rollout every X algo update.
+  two_policy_rollout_every: 1 # run two policy rollout every X algo update
+  goal_update_every: 0 # how often to update goal picker
+  go_expl_rand_ac: False
+  planner: {
+    batch: 500,
+    cem_elite_ratio: 0.2,
+    cost_use_p2e_value: True,
+    evaluate_only: False,
+    final_step_cost: True,
+    goal_min: [0.0],
+    goal_max: [0.0],
+    horizon: 50,
+    init_candidates: [123456789.0],
+    init_env_goal_percent: 0.0,
+    mega_prior: False,
+    mppi_gamma: 10.0,
+    optimization_steps: 5,
+    planner_type: shooting_mppi,
+    repeat_samples: 0,
+    std_scale: 1.0,
+    sample_replay: False,
+    sample_env_goal_percent: 0.0,
+  }
+
+  # Dynamical Distance
+  dd_inp : 'embed'
+  dd_num_positives : 256
+  dd_neg_sampling_factor : 0.0
+  dd_norm_inp : False
+  dd_norm_reg_label : True
+  dd_train_imag : True
+  dd_train_off_policy : False
+  dd_distance : 'steps_to_go'
+  dd_loss : 'regression'
+  dd_prob_balance: 1.0
+  dd_opt: {opt: adam, lr: 8e-5, eps: 1e-5, clip: 100, wd: 1e-6}
+
+  # Exploration
+  expl_intr_scale: 1.0
+  expl_extr_scale: 0.0
+  expl_opt: {opt: adam, lr: 3e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+  expl_head: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  expl_reward_norm: {momentum: 1.0, scale: 1.0, eps: 1e-8}
+  disag_target: stoch
+  disag_log: False
+  disag_models: 10
+  disag_offset: 1
+  disag_action_cond: True
+  expl_model_loss: kl
+
+peg_walker:
+  action_repeat: 2
+  actor_opt.lr: 8e-5
+  actor_ent: 0.00001
+  clip_rewards: identity
+  critic_opt.lr: 8e-5
+  dataset: {batch: 45, length: 50}
+  decoder: {mlp_keys: 'qpos', cnn_keys: '$^', mlp_layers: [400,400,400]}
+  dd_neg_sampling_factor : 0.1
+  disag_models: 10
+  encoder: {mlp_keys: 'qpos', cnn_keys: '$^', mlp_layers: [400, 400, 400]}
+  eval_every: 66 # 66 episodes = 1e4 steps.
+  expl_behavior: 'Plan2Explore'
+  expl_extr_scale: 0.0
+  exp_rollout_every: 0 # run exp rollout every X algo updates
+  gc_reward: 'dynamical_distance'
+  grad_heads: [decoder]
+  goal_policy_rollout_percentage: 0.5
+  goal_update_every: 50 # every 50 episodes, update goal picker
+  goal_strategy: 'SubgoalPlanner'
+  goal_key: 'goal'
+  gcp_rollout_every: 0 # run gcp rollout every X algo updates
+  kl.free: 1.0
+  # log_keys_mean: 'metric_'
+  # log_keys_max: 'metric_'
+  log_keys_video: ['none']
+  model_opt.lr: 3e-4
+  p2e_discount: 0.996
+  prefill: 33 # 2500 steps.
+  pretrain: 100
+  pred_discount: False
+  pred_reward: False
+  pred_embed: True
+  planner: {
+    batch: 500,
+    horizon: 75,
+    mppi_gamma: 2.0,
+    planner_type: shooting_mppi,
+    goal_min: [-1.3, -20.0, -3.14, -3.14, -3.14,-3.14,-3.14,-3.14,-3.14,],
+    goal_max: [0.5, 20.0, 3.14, 3.14, 3.14, 3.14, 3.14, 3.14, 3.14],
+    std_scale: 5.0,
+  }
+  replay: {capacity: 2e6, ongoing: False, minlen: 50, maxlen: 50, prioritize_ends: False, sample_recent: True, recent_episode_threshold: 666 } # 100K steps
+  rssm: {ensemble: 1, hidden: 200, deter: 200, stoch: 50, discrete: 0, act: elu, norm: none, std_act: sigmoid2, min_std: 0.1}
+  subgoal_threshold: 2.0
+  state_key: 'qpos'
+  steps: 1000000
+  time_limit: 150
+  train_every: 5
+  task: dmc_walker_walk_proprio
+  two_policy_rollout_every: 1 # run 2 policy rollout every X expl rollouts.
+
+peg_point_maze:
+  action_repeat: 1
+  actor_opt.lr: 8e-5
+  actor_grad: 'auto'
+  actor_ent: 1e-4
+  clip_rewards: identity
+  critic_opt.lr: 8e-5
+  dataset: {batch: 45, length: 50}
+  dd_neg_sampling_factor : 0.0
+  decoder: {mlp_keys: 'observation', cnn_keys: '$^', mlp_layers: [400,400,400]}
+  disag_models: 10
+  disag_log: False
+  encoder: {mlp_keys: 'observation', cnn_keys: '$^', mlp_layers: [400,400,400]}
+  eval_every: 200 # 200 episodes = 1e4 steps.
+  expl_behavior: 'Plan2Explore'
+  expl_extr_scale: 0.0
+  exp_rollout_every: 0 # run exp rollout every X algo updates
+  gc_reward: 'dynamical_distance'
+  grad_heads: [decoder]
+  goal_policy_rollout_percentage: 0.5
+  goal_update_every: 50 # every 50 episodes, update goal picker
+  goal_strategy: 'SubgoalPlanner'
+  goal_key: 'goal'
+  go_expl_rand_ac: False
+  gcp_rollout_every: 0 # run gcp rollout every X algo updates
+  kl.free: 1.0
+  log_keys_mean: 'metric_'
+  log_keys_sum: 'metric_|subgoal_dist'
+  log_keys_max: 'metric_|subgoal_success'
+  model_opt.lr: 3e-4
+  prefill: 50
+  precision: 16
+  pretrain: 100
+  pred_discount: False
+  pred_reward: False
+  pred_embed: True
+  planner: {planner_type: shooting_cem, horizon: 25, batch: 500, cem_elite_ratio: 0.2, optimization_steps: 5, std_scale: 4.0, init_candidates: [0.0, 0.0], goal_min: [0.0, 0.0],   goal_max: [10.0, 10.0], cost_use_p2e_value: True, final_step_cost: False }
+  replay.prioritize_ends: False
+  replay.sample_recent: True
+  rssm: {ensemble: 1, hidden: 200, deter: 200, stoch: 50, discrete: 0, act: elu, norm: none, std_act: sigmoid2, min_std: 0.1}
+  subgoal_threshold: 5.0
+  state_key: 'observation'
+  steps: 1000000
+  time_limit: 50
+  train_every: 5
+  task: pointmaze
+  two_policy_rollout_every: 1 # run 2 policy rollout every X algo updates
+
+peg_ant_maze:
+  action_repeat: 1
+  actor_opt.lr: 8e-5
+  actor_grad: 'auto'
+  actor_ent: 0.00001
+  clip_rewards: identity
+  critic_opt.lr: 8e-5
+  dataset: {batch: 45, length: 50}
+  dd_neg_sampling_factor : 0.1
+  decoder: {mlp_keys: 'observation', cnn_keys: '$^', mlp_layers: [400,400,400]}
+  disag_models: 10
+  disag_log: False
+  discount: 0.996
+  encoder: {mlp_keys: 'observation', cnn_keys: '$^', mlp_layers: [400,400,400]}
+  eval_every: 40 # 40 episodes = 2e4 steps.
+  expl_behavior: 'Plan2Explore'
+  expl_extr_scale: 0.0
+  exp_rollout_every: 0 # run exp rollout every X algo updates
+  gc_reward: 'dynamical_distance'
+  grad_heads: [decoder]
+  goal_policy_rollout_percentage: 0.3
+  goal_update_every: 50 # every 50 episodes, update goal picker
+  goal_strategy: 'SubgoalPlanner'
+  goal_key: 'goal'
+  gcp_rollout_every: 0 # run gcp rollout every X algo updates
+  kl.free: 1.0
+  log_keys_video: ['observation']
+  model_opt.lr: 3e-4
+  p2e_discount: 0.996
+  prefill: 5
+  precision: 16
+  pretrain: 100
+  pred_discount: False
+  pred_reward: False
+  pred_embed: True
+  planner: {
+    batch: 500,
+    cem_elite_ratio: 0.2,
+    cost_use_p2e_value: True,
+    evaluate_only: False,
+    final_step_cost: True,
+    goal_min: [-0.75, -0.5, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
+    goal_max: [5.0, 9.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    horizon: 150,
+    init_candidates: [0.0, 0.0, 8.19890515e-01,  9.95145602e-01,
+        3.48547286e-02, -6.19350100e-02,  6.80766655e-02, -4.42372144e-02,
+       -4.81461428e-02,  1.45511675e-02, -7.75746132e-02,  5.00618279e-02,
+        3.65949561e-02,  4.99939194e-02,  1.02664477e-02, -2.27597298e-01,
+        8.01758031e-02, -8.81610163e-02,  7.77121806e-02,  3.36722131e-02,
+        2.27648027e-02, -2.24103019e-02, -3.77942221e-02, -6.56355237e-02,
+        1.35722257e-01,  6.93039877e-02, -1.71162114e-01, -1.12083335e-01,
+        1.76819156e-02],
+    init_env_goal_percent: 0.0,
+    mega_prior: False,
+    mppi_gamma: 2.0,
+    optimization_steps: 5,
+    planner_type: shooting_mppi,
+    repeat_samples: 0,
+    std_scale: 10.0,
+    sample_replay: False,
+    sample_env_goal_percent: 0.0,
+  }
+  replay: {capacity: 2e6, ongoing: False, minlen: 50, maxlen: 50, prioritize_ends: False, sample_recent: True, recent_episode_threshold: 200 } # 100K steps
+  rssm: {ensemble: 1, hidden: 200, deter: 200, stoch: 50, discrete: 0, act: elu, norm: none, std_act: sigmoid2, min_std: 0.1}
+  subgoal_threshold: 2.0
+  state_key: 'observation'
+  steps: 1000000
+  time_limit: 500
+  train_every: 5
+  task: hardumazefulldownscale
+  two_policy_rollout_every: 1 # run 2 policy rollout every X expl rollouts.
+
+peg_three_stack:
+  action_repeat: 1
+  actor_opt.lr: 8e-5
+  actor_grad: 'auto'
+  actor_ent: 0.00001
+  clip_rewards: identity
+  critic_opt.lr: 8e-5
+  dataset: {batch: 45, length: 50}
+  dd_neg_sampling_factor : 0.1
+  decoder: {mlp_keys: 'observation', cnn_keys: '$^', mlp_layers: [400,400,400]}
+  disag_models: 10
+  disag_log: False
+  encoder: {mlp_keys: 'observation', cnn_keys: '$^', mlp_layers: [400,400,400]}
+  eval_every: 133  # 133 episodes = 2e4 steps.
+  expl_behavior: 'Plan2Explore'
+  expl_extr_scale: 0.0
+  exp_rollout_every: 0 # run exp rollout every X algo updates
+  gc_reward: 'dynamical_distance'
+  gc_input: 'embed'
+  grad_heads: [decoder]
+  goal_policy_rollout_percentage: 0.5
+  goal_update_every: 50 # every 1 episode, update goal picker
+  goal_strategy: 'SubgoalPlanner'
+  goal_key: 'goal'
+  gcp_rollout_every: 0 # run gcp rollout every X algo updates
+  kl.free: 1.0
+  log_keys_sum: 'metric_|log_subgoal_dist'
+  log_keys_max: 'is_success|log_subgoal_success'
+  log_keys_video: ['none']
+  model_opt.lr: 3e-4
+  prefill: 25 # number of episodes of random exploration.
+  precision: 16
+  pretrain: 100
+  pred_discount: False
+  pred_reward: False
+  pred_embed: True
+  planner: {
+    batch: 2000,
+    cem_elite_ratio: 0.2,
+    cost_use_p2e_value: True,
+    evaluate_only: False,
+    final_step_cost: True,
+    goal_min: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    goal_max: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    horizon: 50,
+    init_env_goal_percent: 0.0,
+    mega_prior: False,
+    repeat_samples: 0,
+    std_scale: 0.5,
+    sample_replay: False,
+    sample_env_goal_percent: 0.0,
+  }
+  replay: {capacity: 1e7, ongoing: False, minlen: 50, maxlen: 50, prioritize_ends: False, sample_recent: True, recent_episode_threshold: 2000, shuffle_blocks: True } # 100K steps
+  rssm: {ensemble: 1, hidden: 200, deter: 200, stoch: 50, discrete: 0, act: elu, norm: none, std_act: sigmoid2, min_std: 0.1}
+  state_key: 'observation'
+  steps: 1100000
+  subgoal_threshold: 1.0
+  time_limit: 150
+  train_every: 5
+  task: wallsdemofetchpnp3
+  two_policy_rollout_every: 1 # run 2 policy rollout every X expl rollouts.
+
+debug:
+  jit: False
+  # time_limit: 100
+  eval_every: 5
+  log_every: 500
+  prefill: 1
+  pretrain: 1
+  train_steps: 1
+  train_every: 100000
+  # replay: {minlen: 10, maxlen: 30}
+  # dataset: {batch: 1, length: 50}
+
+test_maze:
+  jit: False
+  eval_every: 100 # set this to a low number if you're debugging eval logic
+  goal_strategy: 'SubgoalPlanner'
+  log_every: 500
+  prefill: 1
+  pretrain: 1
+  steps: 5000
+  train_steps: 1
+  train_every: 1000
+
+test_walker:
+  jit: False
+  eval_every: 100 # set this to a low number if you're debugging eval logic
+  goal_strategy: 'SubgoalPlanner'
+  log_every: 500
+  prefill: 1
+  pretrain: 1
+  steps: 5000
+  train_steps: 1
+  train_every: 1000
