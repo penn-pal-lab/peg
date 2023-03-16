@@ -23,9 +23,9 @@ If you find our paper or code useful, please reference us:
 }
 ```
 To learn more:
-- [Research Paper](https://openreview.net/forum?id=6qeBuZSo7Pr)
-- [Website](https://sites.google.com/view/exploratory-goals)
-- [OpenReview](https://openreview.net/forum?id=6qeBuZSo7Pr)
+- [Paper](https://openreview.net/forum?id=6qeBuZSo7Pr)
+- [Website](https://penn-pal-lab.github.io/peg/)
+- [Colab Demo](https://colab.research.google.com/drive/1mbr8HHjWAhTQHUP2Y-QOgByuOOXBpusD?usp=sharing)
 
 ## Planning Exploratory Goals
 
