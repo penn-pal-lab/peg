@@ -23,7 +23,7 @@ If you find our paper or code useful, please reference us:
 }
 ```
 To learn more:
-- [Paper](https://openreview.net/forum?id=6qeBuZSo7Pr)
+- [Paper](https://arxiv.org/abs/2303.13002)
 - [Website](https://penn-pal-lab.github.io/peg/)
 - [Colab Demo](https://colab.research.google.com/drive/1mbr8HHjWAhTQHUP2Y-QOgByuOOXBpusD?usp=sharing)
 
